@@ -1,0 +1,171 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+      <title>Google Map Example</title>
+      <style type="text/css">
+          #map1 {
+             height: 600px;
+             width: 800px;
+             float: left;
+          }
+          #map2 {
+             height: 600px;
+             width: 800px;
+             float: left;
+          }
+      </style>
+      
+      <!-- Get Google's Javascript -->
+      <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false">
+      </script>
+ 
+      <!-- getMap creates a call back handler that executes when the geo coding is complete.
+      -->
+      
+      <script type="text/javascript">
+ 
+      function getMap(s) {
+          
+         var userLocation = s.inputbox.value; // location name to geocode
+         
+         var pointOfView = { heading:120, pitch:0, zoom:1}; 
+ 
+         var geocoder = new google.maps.Geocoder();
+         
+         geocoder.geocode( 
+         
+            {'address': userLocation}, 
+         
+            function(results, status) {
+                
+                if (status == google.maps.GeocoderStatus.OK) {
+               
+                    //place a Panarama at location map1
+                    new google.maps.StreetViewPanorama(
+                             document.getElementById("map1"),
+                             { position: results[0].geometry.location, pov: pointOfView, visible:true }
+                         );
+                       
+                    
+                    // Prepare to draw street map
+                    var mapOptions = {
+                                      zoom: 8,
+                                      center: results[0].geometry.location,
+                                      mapTypeId: google.maps.MapTypeId.ROADMAP
+                    };
+
+                    // place a strret map at map2
+                    new google.maps.Map(document.getElementById("map2"),mapOptions);
+                                       
+                } 
+                else {
+                    alert("Geocode failed. Reason: " + status);
+                }
+            }
+         );
+     }
+ 
+     
+    </script>
+    
+   
+    
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.0/themes/base/jquery-ui.css" />
+<script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+<script src="http://code.jquery.com/ui/1.10.0/jquery-ui.js"></script>
+
+
+<style>
+.ui-autocomplete-loading
+	{
+	
+		background: white url('images/ui-anim_basic_16x16.gif') right center no-repeat;
+	}
+	#city 
+	{ 
+		
+	}
+	.myclass{color:red;}
+
+.ui-autocomplete 
+{
+	max-height: 152px;
+	overflow-y: auto;
+	/* prevent horizontal scrollbar */
+	overflow-x: hidden
+}
+* html 
+.ui-autocomplete {
+height: 152px;	
+}
+
+</style>
+<!-- ********************************************************************************************* -->
+<script>
+
+$(function() {
+
+	$( "#city" ).autocomplete({
+		
+		source: function( request, response ) {
+			$( ".my_img" ).show();
+		$.ajax({
+		url: "http://ws.geonames.org/searchJSON",
+		dataType: "jsonp",
+		data: {
+				featureClass: "P",
+				style: "full",
+				name_startsWith: request.term
+				},
+				success: function( data ) {
+			$( ".my_img" ).hide();		
+					if(data.geonames=="")
+					{
+							alert('not found');
+					}
+					else{
+							response( $.map( data.geonames, function( item ) {
+							
+								return {
+										label: item.name + (item.adminName1 ? ", " + item.adminName1 : "") + ", " + item.countryName,
+										value: item.name
+									}
+							}));
+						}
+						$( "#small_gray_loader" ).hide();
+			}
+		});
+	}
+	});
+
+	});
+</script>
+<!-- ********************************************************************************************* -->
+
+    
+    
+    
+    </head>
+    <body>
+        
+        <!-- Ask user for a location - city,state -->
+        <!-- Call getMap passing the location to be geocoded and rendered as two maps. -->
+        <FORM>Enter a location in the box: <BR>
+           <INPUT TYPE="text" NAME="inputbox" id="city" VALUE=""><P>
+           <INPUT TYPE="button" NAME="button" Value="Get Street View" onClick="getMap(this.form)">
+        </FORM>      
+       <div id="map1"></div>
+       
+       <div id="map2"></div>
+    </body>
+</html>
+
+<!--I have modified the HTML code provided by professor Mike. In this code, If a user will enter a location then it 
+will show the other locations options starting from the sane letters. This modification will help user to get 
+a location if he knows few letters of the location. 
+I use Google API for getting the location options. I took lots of reference from www.google.com to implement the code.-->
